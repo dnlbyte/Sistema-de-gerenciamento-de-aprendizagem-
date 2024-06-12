@@ -22,6 +22,11 @@ public class CourseForm {
     @Size(min = 3, max = 100, message = "The name must be between 3 and 100 characters.")
     private String description;
 
+    @NotNull(message = "The category field cannot be empty")
+    @NotBlank(message = "The category field cannot be blank.")
+    @Size(min = 3, max = 100, message = "The category must be between 3 and 100 characters.")
+    private String category;
+
     @NotNull(message = "The price field cannot be empty")
     @DecimalMax(value = "99999.99")
     @Digits(integer = 16, fraction = 2)

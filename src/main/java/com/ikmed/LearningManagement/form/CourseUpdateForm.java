@@ -41,5 +41,5 @@ public class CourseUpdateForm {
     private LocalDate startAt;
 
     @NotNull(message = "The finishAt field cannot be empty")
-    private LocalDate finishAt;
+    private LocalDate finishAt; //
 }
