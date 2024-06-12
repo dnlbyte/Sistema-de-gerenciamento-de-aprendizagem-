@@ -6,6 +6,7 @@ import com.ikmed.LearningManagement.form.CourseUpdateForm;
 import com.ikmed.LearningManagement.mapper.CourseMapper;
 import com.ikmed.LearningManagement.model.CourseModel;
 import com.ikmed.LearningManagement.repository.CourseRepository;
+import com.ikmed.LearningManagement.service.exceptions.*;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class CourseService {
         Set<CourseModel> courseModelSet = courseRepository.findByIsActiveTrue();
 
         if(courseModelSet.isEmpty()){
-            throw new RuntimeException("No active courses found");
+            throw new CourseNotFoundException("No active courses found");
         }
         return  CourseMapper.INSTANCE.setModelToSetDto(courseModelSet);
     }
@@ -35,20 +36,21 @@ public class CourseService {
         CourseModel courseModel = findByNameAndIsActiveTrue(name);
         return CourseMapper.INSTANCE.ModelToDto(courseModel);
     }
-    public CourseModel findByNameAndIsActiveTrue(String name){
-        return courseRepository.findByNameAndIsActiveTrue(name).orElseThrow( () -> new RuntimeException("Faild to recive model"));
-    }
 
     @Transactional
     public CourseDTO insertCourse(CourseForm courseForm){
-        Optional<CourseModel> courseModelVerify = courseRepository.findByNameAndIsActiveTrue(courseForm.getName());
-       if(courseModelVerify.isPresent()){
-           throw new RuntimeException("Course already exists");
+        findByNameAndIsActiveTrue(courseForm.getName());
+       if(isCourseExists(courseForm.getName())){
+           throw new CourseAlreadyExistsException(String.format("Course already ‘%s’ exists", courseForm.getName()));
        }
         try{
             Date date = new Date();
 
             CourseModel courseModel = CourseMapper.INSTANCE.formToModel(courseForm);
+            courseModel.setPrice(courseModel.getPrice());
+            courseModel.setDiscount(courseModel.getDiscount());
+            courseModel.setDescription(courseModel.getDescription());
+            courseModel.setDutarion(courseModel.getDutarion());
             courseModel.setCreatedAt(date);
             courseModel.setUpdatedAt(date);
             courseModel.setActive(true);
@@ -56,31 +58,34 @@ public class CourseService {
             courseRepository.save(courseModel);
             return CourseMapper.INSTANCE.ModelToDto(courseModel);
         }catch (DataIntegrityViolationException err){
-            throw new RuntimeException("fail to register the Course");
+            throw new CourseInsertException(String.format("Fail to insert the  ‘%s’ course", courseForm.getName()));
         }
     }
 
     public CourseDTO updateCourse(String name, CourseUpdateForm courseUpdateForm){
         try{
+            Date date = new Date();
+
             CourseModel courseModel = findByNameAndIsActiveTrue(name);
 
-            courseModel.setPrice(courseUpdateForm.getPrice());
-            courseModel.setDescription(courseUpdateForm.getDescription());
-            courseModel.setDutarion(courseUpdateForm.getDuration());
-            courseModel.setDiscount(courseUpdateForm.getDiscount());
-            courseModel.setStartAt(courseUpdateForm.getStartAt());
-
+            courseModel.setPrice(courseModel.getPrice());
+            courseModel.setDescription(courseModel.getDescription());
+            courseModel.setDutarion(courseModel.getDutarion());
+            courseModel.setDiscount(courseModel.getDiscount());
+            courseModel.setStartAt(courseModel.getStartAt());
+            courseModel.setUpdatedAt(date);
+            courseRepository.save(courseModel);
             return CourseMapper.INSTANCE.ModelToDto(courseModel);
         }catch(DataIntegrityViolationException err){
-            throw new RuntimeException("Fail to update the course");
+            throw new CourseUpdateException(String.format("Fail to update the  ‘%s’ course", name));
         }
     }
 
-    public void deleteCourse(String subject){
+    public void deleteCourse(String name){
         try{
             Date date = new Date();
 
-            CourseModel courseModel = findByNameAndIsActiveTrue(subject);
+            CourseModel courseModel = findByNameAndIsActiveTrue(name);
             courseModel.setActive(false);
             courseModel.setUpdatedAt(date);
             courseRepository.save(courseModel);
@@ -88,5 +93,16 @@ public class CourseService {
             throw new RuntimeException("Fail to update the course");
         }
     }
+    public Boolean isCourseExists(String name){
+        try{
+            courseRepository.findByNameAndIsActiveTrue(name);
+            return true;
+        }catch(ModuleNotFoundException err){
+            return false;
+        }
+    }
 
+    public CourseModel findByNameAndIsActiveTrue(String name){
+        return courseRepository.findByNameAndIsActiveTrue(name).orElseThrow(() -> new CourseNotFoundException(String.format("The module ‘%s’ is already registered", name)));
+    }
 }
