@@ -9,8 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 @Repository
-public interface ContentRepository extends JpaRepository<ContentModel, UUID> {
-    Optional<ContentModel> findByIdAndIsActiveTrue(UUID id);
+public interface ContentRepository extends JpaRepository<ContentModel, String> {
+    Optional<ContentModel> findByTitleAndIsActiveTrue(String title);
 
     Set<ContentModel> findByIsActiveTrue();
 }
