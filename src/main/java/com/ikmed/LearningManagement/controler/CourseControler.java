@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 @RestController
-@RequestMapping("/mail")
+@RequestMapping("/course")
 public class CourseControler {
 
     private final CourseService courseService;
@@ -33,7 +33,7 @@ public class CourseControler {
     }
 
 
-    @PostMapping("/{name}")
+    @PutMapping("/{name}")
     public ResponseEntity<CourseDTO> updateCourse(
             @PathVariable("name") String name,
             @Valid @RequestBody CourseUpdateForm courseUpdateForm
@@ -42,7 +42,7 @@ public class CourseControler {
         return ResponseEntity.ok().body(courseDTO);
     }
 
-    @PutMapping("/{name}")
+    @PostMapping("/{name}")
     public ResponseEntity<CourseDTO> insertCourse(CourseForm courseForm){
         CourseDTO courseDTO = courseService.insertCourse(courseForm);
        return ResponseEntity.ok().body(courseDTO);
