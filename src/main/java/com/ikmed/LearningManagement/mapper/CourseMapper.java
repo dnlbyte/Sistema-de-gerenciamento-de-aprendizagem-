@@ -11,7 +11,6 @@ import java.util.Set;
 @Mapper(componentModel = "spring")
 public abstract class CourseMapper {
     public static final  CourseMapper INSTANCE = Mappers.getMapper(CourseMapper.class);
-
     public abstract CourseModel formToModel(CourseForm form);
 
     public abstract CourseDTO ModelToDto(CourseModel model);

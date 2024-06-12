@@ -10,7 +10,7 @@ import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public abstract class ModuleMapper {
-    public static final  CourseMapper INSTANCE = Mappers.getMapper(CourseMapper.class);
+    public static final  ModuleMapper INSTANCE = Mappers.getMapper(ModuleMapper.class);
 
     public abstract ModuleModel formToModel(ModuleForm form);
 
